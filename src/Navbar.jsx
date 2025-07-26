@@ -15,7 +15,7 @@ const Navbar = () => {
 
     const handleAdminClick = () => {
         if (!isLoggedIn) {
-            toast.warn("Please Login First To Access Admin DashBoard");
+            toast.warn("Please Login First To Access Admin Dashboard");
         }
     };
 
@@ -31,30 +31,27 @@ const Navbar = () => {
                         Contact Us
                     </Link>
 
-                    {isLoggedIn ? (
-                        <Link to="/dashboard" className="hover:text-gray-200">
-                            AdminDashboard
-                        </Link>
-                    ) : (
-                        <span
-                            className="hover:text-gray-200 cursor-pointer"
-                            onClick={handleAdminClick}
-                        >
-                            AdminDashboard
-                        </span>
-                    )}
-
                     {!isLoggedIn ? (
-                        <Link to="/login" className="hover:text-gray-200">
-                            Login
-                        </Link>
+                        <>
+                            <Link to="/login" className="hover:text-gray-200">
+                                Admin Login
+                            </Link>
+                        </>
                     ) : (
-                        <button
-                            onClick={handleLogout}
-                            className="bg-red-500 px-3 py-1 rounded hover:bg-red-600"
-                        >
-                            Logout
-                        </button>
+                        <>
+                            <Link to="/dashboard" className="hover:text-gray-200">
+                                Admin Dashboard
+                            </Link>
+                            <Link to="/enquiries" className="hover:text-gray-200">
+                                Enquiries
+                            </Link>
+                            <button
+                                onClick={handleLogout}
+                                className="bg-red-500 px-3 py-1 rounded hover:bg-red-600"
+                            >
+                                Logout
+                            </button>
+                        </>
                     )}
                 </div>
 
@@ -74,30 +71,27 @@ const Navbar = () => {
                         Contact Us
                     </Link>
 
-                    {isLoggedIn ? (
-                        <Link to="/dashboard" className="block hover:text-gray-200">
-                            AdminDashboard
-                        </Link>
-                    ) : (
-                        <span
-                            className="block hover:text-gray-200 cursor-pointer"
-                            onClick={handleAdminClick}
-                        >
-                            AdminDashboard
-                        </span>
-                    )}
-
                     {!isLoggedIn ? (
-                        <Link to="/login" className="block hover:text-gray-200">
-                            Login
-                        </Link>
+                        <>
+                            <Link to="/login" className="block hover:text-gray-200">
+                                Admin Login
+                            </Link>
+                        </>
                     ) : (
-                        <button
-                            onClick={handleLogout}
-                            className="block w-full text-left bg-red-500 px-3 py-1 rounded hover:bg-red-600"
-                        >
-                            Logout
-                        </button>
+                        <>
+                            <Link to="/dashboard" className="block hover:text-gray-200">
+                                Admin Dashboard
+                            </Link>
+                            <Link to="/enquiries" className="block hover:text-gray-200">
+                                Enquiries
+                            </Link>
+                            <button
+                                onClick={handleLogout}
+                                className="block w-full text-left bg-red-500 px-3 py-1 rounded hover:bg-red-600"
+                            >
+                                Logout
+                            </button>
+                        </>
                     )}
                 </div>
             )}

@@ -12,7 +12,7 @@ function Contact() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            await axios.post("https://backtest-0ggn.onrender.com/api/contact", formData);
+            await axios.post("https://back-test-blond.vercel.app/api/contact", formData);
             toast.success("Form submitted successfully");
             setFormData({ name: "", email: "", subject: "", message: "" });
         } catch (err) {

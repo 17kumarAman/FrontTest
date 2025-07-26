@@ -9,6 +9,7 @@ import AdminDashboard from './pages/AdminDashBoard'
 import ProtectedRoute from './components/ProtectedRoute'
 
 import { Routes, Route, Navigate } from "react-router-dom";
+import Enquiries from './pages/Enquiries'
 
 // import { Routes, Route } from "react-router-dom";
 function App() {
@@ -25,6 +26,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/enquiries"
+            element={
+              <ProtectedRoute>
+                <Enquiries />
               </ProtectedRoute>
             }
           />
