@@ -1,46 +1,87 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
-import Login from './pages/Login'
-import Contact from './pages/Contact '
-import Navbar from './Navbar'
-import AdminDashboard from './pages/AdminDashBoard'
-import ProtectedRoute from './components/ProtectedRoute'
+import { useState } from 'react';
+import { Navigate, Route, Routes } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import './App.css';
+import Navbar from './Navbar';
+import Sidebar from './components/Sidebar';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import AdminAppointments from './pages/AdminAppointments';
+import AdminDashboard from './pages/AdminDashBoard';
+import BookAppointment from './pages/BookAppointment';
+import Contact from './pages/Contact ';
+import DoctorAppointments from './pages/DoctorAppointments';
+import DoctorAvailability from './pages/DoctorAvailability';
+import DoctorForm from './pages/DoctorForm';
+import DoctorPage from './pages/DoctorPage';
+import Enquiries from './pages/Enquiries';
+import Login from './pages/Login';
+import DoctorProfile from './pages/DoctorProfile';
 
-import { Routes, Route, Navigate } from "react-router-dom";
-import Enquiries from './pages/Enquiries'
-
-// import { Routes, Route } from "react-router-dom";
-function App() {
+function AppContent() {
+  const { isAuthenticated, userType } = useAuth();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <main className="mx-auto">
-        <Routes>
-          <Route path="/" element={<Navigate to="/contact-us" replace />} />
-          <Route path="/contact-us" element={<Contact />} />
-          <Route path="/login" element={<Login />} />
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <AdminDashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/enquiries"
-            element={
-              <ProtectedRoute>
-                <Enquiries />
-              </ProtectedRoute>
-            }
-          />
-          <Route path="*" element={<Navigate to="/contact-us" replace />} />
-        </Routes>
-      </main>
+      <Navbar onSidebarToggle={() => setSidebarOpen(!sidebarOpen)} />
+      
+      {isAuthenticated ? (
+        <div className="flex h-[calc(100vh-64px)] max-w-[1720px] mx-auto">
+          <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+          <main className="flex-1 overflow-auto">
+            <div className="p-4">
+              <Routes>
+                <Route path="/dashboard" element={<AdminDashboard />} />
+                <Route path="/enquiries" element={<Enquiries />} />
+                <Route path="/doctors" element={<DoctorPage />} />
+                <Route path="/doctors/create" element={<DoctorForm />} />
+                <Route path="/doctors/edit/:id" element={<DoctorForm />} />
+                <Route path="/appointments" element={
+                  userType === 'admin' ? <AdminAppointments /> : <DoctorAppointments />
+                } />
+                <Route path="/availability" element={<DoctorAvailability />} />
+                <Route path="/myprofile" element={<DoctorProfile />} />
+
+                <Route path="*" element={<Navigate to="/dashboard" replace />} />
+              </Routes>
+            </div>
+          </main>
+        </div>
+      ) : (
+        <main>
+          <Routes>
+            <Route path="/" element={<Navigate to="/contact-us" replace />} />
+            <Route path="/contact-us" element={<Contact />} />
+            <Route path="/book-appointment" element={<BookAppointment />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="*" element={<Navigate to="/contact-us" replace />} />
+          </Routes>
+        </main>
+      )}
+
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+        limit={3}
+        closeButton
+      />
     </div>
+  )
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   )
 }
 
