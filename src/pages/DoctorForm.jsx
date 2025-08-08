@@ -22,7 +22,7 @@ const initialFormData = {
     available_days: '',
     available_time: '',
     profile_image: '',
-    created_by: "ADMIN",
+    created_by: "1",
 };
 
 const DoctorForm = () => {
