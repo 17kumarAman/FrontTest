@@ -1,12 +1,13 @@
-import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import Navbar from '../Navbar'; // ✅ Import Navbar
+import { useEffect, useState } from 'react';
+import { Search, Mail, Calendar, User } from 'lucide-react';
 
 const Enquiries = () => {
     const [contacts, setContacts] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
-    const pageSize = 5;
+    const pageSize = 10;
 
     const formatDate = (isoString) => {
         const date = new Date(isoString);
@@ -25,24 +26,24 @@ const Enquiries = () => {
     useEffect(() => {
         const fetchContacts = async () => {
             try {
-                const res = await axios.get("https://back-test-blond.vercel.app/api/contact");
+                setLoading(true);
+                const res = await axios.get("https://doctor-omega-rouge.vercel.app/api/contact");
                 setContacts(res.data.contacts || []);
             } catch (err) {
                 console.error("Error fetching contacts", err);
                 setContacts([]);
+            } finally {
+                setLoading(false);
             }
         };
         fetchContacts();
     }, []);
 
-    const headers = contacts.length > 0
-        ? Object.keys(contacts[0]).filter(key => key !== 'updatedAt')
-        : [];
-
     const filteredContacts = contacts.filter(contact =>
-        headers.some(key =>
-            String(contact[key]).toLowerCase().includes(searchQuery.toLowerCase())
-        )
+        contact.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        contact.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        contact.subject?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        contact.message?.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     const totalPages = Math.ceil(filteredContacts.length / pageSize);
@@ -57,77 +58,135 @@ const Enquiries = () => {
     };
 
     return (
-        <>
-            <Navbar />
-            <div className="p-6">
-                <h2 className="text-xl font-bold mb-4">Contact Submissions</h2>
+        <div className="space-y-6">
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h1 className="text-2xl font-bold text-gray-900">Enquiries</h1>
+                    <p className="text-gray-600">Manage contact form submissions</p>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <Mail size={16} />
+                    <span>{filteredContacts.length} enquiries</span>
+                </div>
+            </div>
 
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
-                    <p className="text-gray-600 font-medium mb-2 sm:mb-0">
-                        Total Forms Received: <span className="font-semibold">{filteredContacts.length}</span>
-                    </p>
-                    <input
-                        type="text"
-                        placeholder="Search..."
-                        className="border border-gray-300 rounded px-3 py-1 w-full sm:w-64"
-                        value={searchQuery}
-                        onChange={handleSearch}
-                    />
+            {/* Search and Stats */}
+            <div className="bg-white rounded-lg shadow p-6">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                    <div className="relative flex-1 max-w-md">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                        <input
+                            type="text"
+                            placeholder="Search by name, email, subject..."
+                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            value={searchQuery}
+                            onChange={handleSearch}
+                        />
+                    </div>
+                    <div className="text-sm text-gray-600">
+                        {filteredContacts.length} of {contacts.length} enquiries
+                    </div>
                 </div>
 
-                {filteredContacts.length === 0 ? (
-                    <p className="text-gray-500 font-semibold">No Data Available</p>
-                ) : (
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-100 whitespace-nowrap">
+                {/* Table */}
+                <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                        <thead className="bg-gray-50">
+                            <tr>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subject</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Message</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                            </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                            {loading ? (
                                 <tr>
-                                    {headers.map((key) => (
-                                        <th key={key} className="px-4 py-4 text-left text-xs font-semibold text-slate-900 uppercase tracking-wider">
-                                            {key}
-                                        </th>
-                                    ))}
+                                    <td colSpan="5" className="px-6 py-4 text-center text-gray-500">
+                                        Loading enquiries...
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody className="bg-white divide-y divide-gray-200 whitespace-nowrap">
-                                {paginatedContacts.map((contact) => (
-                                    <tr key={contact.id}>
-                                        {headers.map((key) => (
-                                            <td key={key} className="px-4 py-4 text-sm text-slate-900 font-medium">
-                                                {key === 'createdAt'
-                                                    ? formatDate(contact[key])
-                                                    : contact[key]}
-                                            </td>
-                                        ))}
+                            ) : paginatedContacts.length === 0 ? (
+                                <tr>
+                                    <td colSpan="5" className="px-6 py-4 text-center text-gray-500">
+                                        {searchQuery ? 'No enquiries found matching your search' : 'No enquiries found'}
+                                    </td>
+                                </tr>
+                            ) : (
+                                paginatedContacts.map((contact) => (
+                                    <tr key={contact.id} className="hover:bg-gray-50">
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="flex items-center">
+                                                <div className="flex-shrink-0 h-8 w-8">
+                                                    <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
+                                                        <User size={16} className="text-blue-600" />
+                                                    </div>
+                                                </div>
+                                                <div className="ml-4">
+                                                    <div className="text-sm font-medium text-gray-900">{contact.name}</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{contact.email}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{contact.subject}</td>
+                                        <td className="px-6 py-4 text-sm text-gray-900">
+                                            <div className="max-w-xs truncate" title={contact.message}>
+                                                {contact.message}
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <div className="flex items-center">
+                                                <Calendar size={14} className="mr-1" />
+                                                {formatDate(contact.createdAt)}
+                                            </div>
+                                        </td>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
 
-                        {/* Pagination Controls */}
-                        <div className="mt-4 flex justify-center items-center gap-4">
+                {/* Pagination */}
+                {totalPages > 1 && (
+                    <div className="flex justify-center mt-6">
+                        <nav className="flex items-center space-x-2">
                             <button
-                                onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
+                                onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                                 disabled={currentPage === 1}
-                                className="px-3 py-1 bg-slate-200 hover:bg-slate-300 rounded disabled:opacity-50"
+                                className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                Prev
+                                Previous
                             </button>
-                            <span className="text-sm font-medium text-gray-700">
-                                Page {currentPage} of {totalPages}
-                            </span>
+                            
+                            {Array.from({ length: totalPages }, (_, idx) => (
+                                <button
+                                    key={idx}
+                                    onClick={() => setCurrentPage(idx + 1)}
+                                    className={`px-3 py-2 text-sm font-medium rounded-md ${
+                                        currentPage === idx + 1
+                                            ? 'bg-blue-600 text-white'
+                                            : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
+                                    }`}
+                                >
+                                    {idx + 1}
+                                </button>
+                            ))}
+                            
                             <button
-                                onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
+                                onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                                 disabled={currentPage === totalPages}
-                                className="px-3 py-1 bg-slate-200 hover:bg-slate-300 rounded disabled:opacity-50"
+                                className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 Next
                             </button>
-                        </div>
+                        </nav>
                     </div>
                 )}
             </div>
-        </>
+        </div>
     );
 };
 

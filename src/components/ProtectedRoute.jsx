@@ -1,12 +1,11 @@
-import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
 const ProtectedRoute = ({ children }) => {
-    const isLoggedIn = !!localStorage.getItem('admin');
+    const isLoggedIn = !!localStorage.getItem('admin') || !!localStorage.getItem('doctor');
 
     if (!isLoggedIn) {
-        toast.error('Please login to access the admin dashboard');
+        toast.error('Please login to access this page');
         return <Navigate to="/login" replace />;
     }
 
